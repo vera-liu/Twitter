@@ -1,0 +1,31 @@
+<!-- fragment_edit_name.xml -->
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/edit_item"
+    android:layout_width="wrap_content" android:layout_height="wrap_content"
+    android:layout_gravity="center" android:orientation="vertical"  >
+    <ImageView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/owner_profile" />
+    <EditText
+        android:id="@+id/edit_tweet"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/owner_profile"
+        android:inputType="text"
+        android:paddingLeft="5dp"
+        android:maxLength="140"/>
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_toEndOf="@+id/owner_profile"
+        android:layout_toRightOf="@+id/owner_profile"
+        android:paddingLeft="5dp"
+        android:text="What's on your mind?"/>
+
+    <Button
+        android:id="@+id/postBtn"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="POST" />
+</LinearLayout>
