@@ -34,6 +34,13 @@ public class TwitterClient extends OAuthBaseClient {
         client.get(apiUrl, params, handler);
     }
 
+    public void getMentions(int page, AsyncHttpResponseHandler handler) {
+        String apiUrl = getApiUrl("statuses/mentions_timeline.json");
+        // Can specify query string params directly or through RequestParams.
+        RequestParams params = new RequestParams();
+        client.get(apiUrl, params, handler);
+    }
+
 
     // RestClient.java
     public void postTweet(String body, AsyncHttpResponseHandler handler) {
@@ -49,4 +56,24 @@ public class TwitterClient extends OAuthBaseClient {
         client.get(apiUrl, handler);
 
     }
+
+    public void getUserInfo(long userId, AsyncHttpResponseHandler handler) {
+        String apiUrl = getApiUrl("users/show.json");
+        RequestParams params = new RequestParams();
+        params.put("user_id", userId);
+
+        // execute request
+        client.get(apiUrl, params, handler);
+    }
+
+    public void getUserTimeline(long userId, AsyncHttpResponseHandler handler) {
+        String apiUrl = getApiUrl("statuses/user_timeline.json");
+        // Can specify query string params directly or through RequestParams.
+        RequestParams params = new RequestParams();
+        params.put("user_id", userId);
+
+        client.get(apiUrl, params, handler);
+
+    }
+
 }

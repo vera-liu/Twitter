@@ -1,15 +1,15 @@
 package com.example.vera_liu.twitter;
 
+import android.content.Context;
 import android.os.Bundle;
-import android.support.v4.app.FragmentManager;
-import android.support.v7.app.AppCompatActivity;
+import android.support.annotation.Nullable;
+import android.support.v4.app.Fragment;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.support.v7.widget.Toolbar;
 import android.util.Log;
-import android.view.Menu;
-import android.view.MenuItem;
-import android.widget.Toast;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.ViewGroup;
 
 import com.example.vera_liu.twitter.adapters.TweetsAdapter;
 import com.example.vera_liu.twitter.models.Tweet;
@@ -24,12 +24,14 @@ import java.util.ArrayList;
 
 import cz.msebera.android.httpclient.Header;
 
-public class HomeActivity extends AppCompatActivity implements ComposeTweetFragment.ComposeTweetListener  {
-    private TwitterClient client;
-    private ArrayList<Tweet> tweets = new ArrayList<Tweet>();
-    private RecyclerView recyclerView;
-    private TweetsAdapter tweetsAdapter;
-    private User currentUser;
+public class TweetsFragment extends Fragment implements ComposeTweetFragment.ComposeTweetListener  {
+    protected TwitterClient client;
+    protected ArrayList<Tweet> tweets = new ArrayList<Tweet>();
+    protected RecyclerView recyclerView;
+    protected TweetsAdapter tweetsAdapter;
+    public static TweetsFragment newInstance() {
+        return new TweetsFragment();
+    }
     public void loadNextDataFromApi(final boolean newQuery) {
         client.getHomeTimeline(1, new JsonHttpResponseHandler() {
 
@@ -86,12 +88,17 @@ public class HomeActivity extends AppCompatActivity implements ComposeTweetFragm
         });
     }
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_home);
-        tweetsAdapter = new TweetsAdapter(this, tweets);
-        recyclerView = (RecyclerView) findViewById(R.id.tweetsView);
-        LinearLayoutManager layoutManager = new LinearLayoutManager(this);
+    public void onAttach(Context context) {
+        super.onAttach(context);
+        client = (TwitterClient) TwitterClient.getInstance(TwitterClient.class, context);
+    }
+
+    @Override
+    public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
+        View view = inflater.inflate(R.layout.activity_home, container, false);
+        tweetsAdapter = new TweetsAdapter(getActivity(), tweets);
+        recyclerView = (RecyclerView) view.findViewById(R.id.tweetsView);
+        LinearLayoutManager layoutManager = new LinearLayoutManager(getActivity());
         recyclerView.setLayoutManager(layoutManager);;
         recyclerView.setAdapter(tweetsAdapter);
         recyclerView.addOnScrollListener(new EndlessScrollListener(layoutManager) {
@@ -103,85 +110,26 @@ public class HomeActivity extends AppCompatActivity implements ComposeTweetFragm
                 // or loadNextDataFromApi(totalItemsCount);
             }
         });
-        client = (TwitterClient) TwitterClient.getInstance(TwitterClient.class, this);
-        // Find the toolbar view inside the activity layout
-        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
-        // Sets the Toolbar to act as the ActionBar for this Activity window.
-        // Make sure the toolbar exists in the activity and is not null
-        setSupportActionBar(toolbar);
+
+        return view;
+    }
+    @Override
+    public void onActivityCreated(Bundle savedInstanceState) {
+        super.onActivityCreated(savedInstanceState);
         loadNextDataFromApi(true);
-        getCurrentUser();
     }
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        getMenuInflater().inflate(R.menu.menu_home, menu);
-        return true;
-    }
-    private void getCurrentUser() {
-        client.getCurrentUserInfo(new JsonHttpResponseHandler() {
 
-            @Override
-            public void onStart() {
-                // called before request is started
-            }
-
-            @Override
-            public void onSuccess(int statusCode, Header[] headers, JSONObject userObj) {
-                try {
-                    currentUser = new User(
-                            userObj.getString("name"),
-                            userObj.getString("screen_name"),
-                            userObj.getString("profile_image_url"),
-                            userObj.getString("description"),
-                            userObj.getInt("followers_count"),
-                            userObj.getInt("friends_count"),
-                            userObj.getLong("id"));
-                } catch (JSONException e) {
-                    e.printStackTrace();
-                }
-            }
-
-            @Override
-            public void onFailure(int statusCode, Header[] headers, String res, Throwable e) {
-                // called when response HTTP status is "4XX" (eg. 401, 403, 404)
-                Log.d("error", e.toString());
-            }
-
-            @Override
-            public void onRetry(int retryNo) {
-                // called when request is retried
-            }
-        });
-    }
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        // Handle action bar item clicks here. The action bar will
-        // automatically handle clicks on the Home/Up button, so long
-        // as you specify a parent activity in AndroidManifest.xml.
-        int id = item.getItemId();
-
-        //noinspection SimplifiableIfStatement
-        if (id == R.id.composeTweet) {
-            FragmentManager fm = getSupportFragmentManager();
-            ComposeTweetFragment editFragment = ComposeTweetFragment.newInstance(currentUser);
-            editFragment.show(fm,"fragment_compose_tweet");
-            return true;
-        }
-
-        return super.onOptionsItemSelected(item);
-    }
     @Override
     public void onPost(String tweet) {
         client.postTweet(tweet, new JsonHttpResponseHandler() {
 
             @Override
             public void onStart() {
-                // called before request is started
+                // called before re quest is started
             }
 
             @Override
             public void onSuccess(int statusCode, Header[] headers, JSONObject response) {
-                Toast.makeText(getBaseContext(), "Posted!", Toast.LENGTH_SHORT);
                 loadNextDataFromApi(true);
             }
 

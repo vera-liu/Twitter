@@ -9,6 +9,7 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.example.vera_liu.twitter.MainActivity;
 import com.example.vera_liu.twitter.R;
 import com.example.vera_liu.twitter.models.Tweet;
 import com.squareup.picasso.Picasso;
@@ -95,7 +96,7 @@ public class TweetsAdapter extends RecyclerView.Adapter<TweetsAdapter.ViewHolder
     }
     @Override
     public void onBindViewHolder(ViewHolder viewHolder, int position) {
-        Tweet tweet = tweets.get(position);
+        final Tweet tweet = tweets.get(position);
         viewHolder.tvUserName.setText(tweet.getUser().getName());
         String timestamp = getRelativeTimeAgo(tweet.getCreated_at());
         viewHolder.tvTimeStamp.setText(timestamp);
@@ -104,6 +105,12 @@ public class TweetsAdapter extends RecyclerView.Adapter<TweetsAdapter.ViewHolder
             Picasso.with(mContext).load(tweet.getUser().getProfile_image_url())
                     .fit().centerCrop().placeholder(R.mipmap.ic_launcher)
                     .into(viewHolder.profileImage);
+        viewHolder.profileImage.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                ((MainActivity) mContext).onUserClicked(tweet.getUser());
+            }
+        });
     }
 
     // Returns the total count of items in the list
